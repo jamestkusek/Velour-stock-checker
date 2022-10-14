@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title>Velour Stock Checker</title>
+  <link rel="stylesheet" href="layout.css" type="text/css">
+</head>
+
+<body>
+  <h1>Velour Stock Checker</h1>
+  <div id="main-page-content">
+    <label for="sortby">sort by: </label>
+    <select name="sortby" id="sortby">
+      <option value="PriceAscending">price (low to high)</option>
+      <option value="PriceDescending">price (high to low)</option>
+      <option value="Alphabetically">alphabetically (a - z)</option>
+    </select>
+    <div id="filtercontainer">
+      <button onmouseover="openfilterbutton()" onmouseout = "closefilterbutton()" id="filterbutton">filters</button>
+      <div onmouseover = "openfilterbutton()" onmouseout = "closefilterbutton()" name="filterdropdown" id="filterdropdown">
+        <div id="sizefilterbox">
+        <p id="sizetitle">sizes:</p>
+        <input class = "sizecheckbox" type="checkbox" id="sizeXS" name="XS" checked>
+        <label for="XS">XS</label><br>
+        <input class = "sizecheckbox" type="checkbox" id="sizeS" name="S" checked>
+        <label for="S">S</label><br>
+        <input class = "sizecheckbox" type="checkbox" id="sizeM" name="M"checked >
+        <label for="M">M</label><br>
+        <input class = "sizecheckbox" type="checkbox" id="sizeL" name="L" checked>
+        <label for="L">L</label><br>
+        <input class = "sizecheckbox" type="checkbox" id="sizeXL" name="XL" checked>
+        <label for="XL">XL</label><br>
+      </div>
+        <div id="priceslidebox">
+          <p id= "pricetitle">price:</p><p id="dynamicpricerange"></p>
+          <input type="range" min = "1" max = "150" value = "1" id ="maxprice">
+        </div>
+      </div>
+
+
+
+
+
+    </div>
+    <div id="applybox">
+      <button id="applybutton" onclick = "applyfilters()">apply</button>
+    </div>
+    <div id="flexbox-products">
+  </div>
+  </div>
+</body>
+
+<script crossorigin="anonymous" src="https://code.jquery.com/jquery-3.6.0.js"></script>
+<script src="elementconstructor.js"></script>
+<script>
+  function openfilterbutton() {
+    var target = document.getElementById("filterdropdown");
+      target.style.display = "block";
+      target.style.outline = "solid 1px black";
+      target.style.borderRadius = "2px";
+  }
+
+  function closefilterbutton() {
+    var target = document.getElementById("filterdropdown");
+      target.style.display = "none";
+
+  }
+</script>
+<script>
+var priceslider = document.getElementById("maxprice");
+var output = document.getElementById("dynamicpricerange");
+output.innerHTML = "up to £" + priceslider.value;
+
+priceslider.oninput = function() {
+  output.innerHTML = "up to £" + this.value;
+}
+
+
+</script>
+<script>
+  function applyfilters() {
+    var checkboxes = document.querySelectorAll("input.sizecheckbox");
+    var pricerange = document.querySelector("#maxprice");
+    var sizechoice = [];
+    for (box of checkboxes) {
+      if (box["checked"]) {
+        sizechoice.push(box["name"]);
+      };
+    };
+    var pboxes = document.querySelectorAll(".productbox");
+    for (x of pboxes) {
+      pprice = x["childNodes"]["3"]["childNodes"]["0"]["innerText"];
+      pprice = ~~pprice;
+      var sizewidgets = x["childNodes"]["2"]["childNodes"];
+      sizefilter: {
+        for (size of sizewidgets) {
+          console.log(pprice, pricerange);
+          if (sizechoice.includes(size["text"]) && (pprice <= pricerange.value)) {
+            target = size["parentNode"]["parentNode"];
+            target.style.display = "block";
+            break sizefilter;
+          }
+        }
+        target = size["parentNode"]["parentNode"];
+        target.style.display = "none";
+      }
+    }
+  };
+</script>
+<script>
+  var productarr = [];
+  var sitelinks = ["https://velourscars.com", "https://velourgarments.eu"]
+  for (var site of sitelinks) {
+    $.getJSON(site + "/products.json", function(data) {
+      for (var product of data.products) {
+        for (var size of product.variants) {
+          if (size.available == true) {
+            const inarray = productarr.find(dic => product.title == dic.name);
+            if (inarray == undefined) {
+              var productlink = site + "/products/" + product.handle;
+              var newentry = productarr.push({
+                "name": product.title,
+                "link": productlink,
+                "price": product["variants"][0]["price"],
+                "image": product["images"][0]["src"],
+                [size.title]: 1
+              });
+            } else {
+              const pos = productarr.indexOf(inarray);
+              productarr[pos][size.title] = 1;
+            };
+          }
+        }
+      }
+      construct(productarr);
+
+    })
+  };
+</script>
+
+</html>
