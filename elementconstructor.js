@@ -5,6 +5,7 @@
 
 //function that generates element for each product with relevant details.
 function construct(array) {
+  allsizes = ["S","M","L","XL","XXL"];
   //creates string list of available sizes for product
   for (var x of array) {
     sizelist = []
@@ -73,7 +74,7 @@ function construct(array) {
     price.style.outline = "2px solid black";
 
 
-    for (var size of sizelist) {
+    for (var size of allsizes /*sizelist*/) {
       var sizewidget = document.createElement("A");
       sizewidget.className = "sizewidget";
       sizewidget.innerHTML = size;
@@ -82,9 +83,14 @@ function construct(array) {
       sizewidget.style.display = "inline-block";
       sizewidget.style.margin = "3px";
       sizewidget.style.padding = "3px";
+      if (sizelist.includes(size)) {
+      }
+      else {
+        sizewidget.style.opacity = "0.3";
+      };
       sizewidget.style.color = "black";
       sizewidget.style.borderRadius = "3px";
-      sizewidget.style.textDecoration = "none !important";
+      sizewidget.style.textDecoration = "none";
       sizewidget.style.outline = "2px solid black";
       sizebox.appendChild(sizewidget);
     }
